@@ -1289,3 +1289,18 @@ DEF_HELPER_4(vsm4r_vs, void, ptr, ptr, env, i32)
 #ifndef CONFIG_USER_ONLY
 DEF_HELPER_1(ssamoswap_disabled, void, env)
 #endif
+
+// --------------------------------------------------------------------------
+
+#define TEMP_HEKE(name) DEF_HELPER_7(name, void, env, tl, tl, tl, tl, tl, tl)
+
+TEMP_HEKE(heke_dma)
+TEMP_HEKE(heke_sort)
+TEMP_HEKE(heke_crush)
+TEMP_HEKE(heke_expand)
+TEMP_HEKE(heke_vdot)
+TEMP_HEKE(heke_vrelu)
+TEMP_HEKE(heke_vscale)
+TEMP_HEKE(heke_vmax)
+TEMP_HEKE(heke_gemm)
+TEMP_HEKE(heke_vadd)

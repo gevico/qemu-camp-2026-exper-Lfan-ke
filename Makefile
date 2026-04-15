@@ -28,7 +28,8 @@ quiet-command = $(quiet-@)$(call quiet-command-run,$1,$2,$3)
 
 UNCHECKED_GOALS := TAGS gtags cscope ctags dist \
     help check-help print-% \
-    docker docker-% lcitool-refresh vm-help vm-test vm-build-%
+    docker docker-% lcitool-refresh vm-help vm-test vm-build-% \
+    hk-rs hk-gp hk-bd hk-is
 
 all:
 .PHONY: all clean distclean recurse-all dist msi FORCE
@@ -295,6 +296,20 @@ update-linux-vdso:
 	  $(MAKE) $(SUBDIR_MAKEFLAGS) -C $$(dirname $$m) -f Makefile.vdso \
 		SRC_PATH=$(SRC_PATH) BUILD_DIR=$(BUILD_DIR); \
 	done
+
+.PHONY: hk-rs hk-gp hk-bd hk-is
+
+hk-rs:
+	@-${MAKE} -f Makefile.camp test-rust
+
+hk-gp:
+	@-${MAKE} -f Makefile.camp test-gpgpu
+
+hk-bd:
+	@-${MAKE} -C build check-gevico-qtest
+
+hk-is:
+	@-${MAKE} -C build check-gevico-tcg
 
 .PHONY: help
 help:

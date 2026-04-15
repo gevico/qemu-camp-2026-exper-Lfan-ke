@@ -69,14 +69,16 @@ target_ulong helper_csrr(CPURISCVState *env, int csr)
      * read-only instruction such as CSRRS/CSRRC with rs1=x0 or CSRRSI/
      * CSRRCI with uimm=0 will raise an illegal instruction exception.
      */
-    if (csr == CSR_SEED) {
+    if (csr == CSR_SEED)
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
     }
 
     target_ulong val = 0;
     RISCVException ret = riscv_csrr(env, csr, &val);
 
-    if (ret != RISCV_EXCP_NONE) {
+    if (ret != RISCV_EXCP_NONE)
+    {
         riscv_raise_exception(env, ret, GETPC());
     }
     return val;
@@ -87,7 +89,8 @@ void helper_csrw(CPURISCVState *env, int csr, target_ulong src)
     target_ulong mask = env->xl == MXL_RV32 ? UINT32_MAX : (target_ulong)-1;
     RISCVException ret = riscv_csrrw(env, csr, NULL, src, mask, GETPC());
 
-    if (ret != RISCV_EXCP_NONE) {
+    if (ret != RISCV_EXCP_NONE)
+    {
         riscv_raise_exception(env, ret, GETPC());
     }
 }
@@ -98,7 +101,8 @@ target_ulong helper_csrrw(CPURISCVState *env, int csr,
     target_ulong val = 0;
     RISCVException ret = riscv_csrrw(env, csr, &val, src, write_mask, GETPC());
 
-    if (ret != RISCV_EXCP_NONE) {
+    if (ret != RISCV_EXCP_NONE)
+    {
         riscv_raise_exception(env, ret, GETPC());
     }
     return val;
@@ -109,7 +113,8 @@ target_ulong helper_csrr_i128(CPURISCVState *env, int csr)
     Int128 rv = int128_zero();
     RISCVException ret = riscv_csrr_i128(env, csr, &rv);
 
-    if (ret != RISCV_EXCP_NONE) {
+    if (ret != RISCV_EXCP_NONE)
+    {
         riscv_raise_exception(env, ret, GETPC());
     }
 
@@ -124,7 +129,8 @@ void helper_csrw_i128(CPURISCVState *env, int csr,
                                           int128_make128(srcl, srch),
                                           UINT128_MAX, GETPC());
 
-    if (ret != RISCV_EXCP_NONE) {
+    if (ret != RISCV_EXCP_NONE)
+    {
         riscv_raise_exception(env, ret, GETPC());
     }
 }
@@ -139,14 +145,14 @@ target_ulong helper_csrrw_i128(CPURISCVState *env, int csr,
                                           int128_make128(maskl, maskh),
                                           GETPC());
 
-    if (ret != RISCV_EXCP_NONE) {
+    if (ret != RISCV_EXCP_NONE)
+    {
         riscv_raise_exception(env, ret, GETPC());
     }
 
     env->retxh = int128_gethi(rv);
     return int128_getlo(rv);
 }
-
 
 /*
  * check_zicbo_envcfg
@@ -156,20 +162,23 @@ target_ulong helper_csrrw_i128(CPURISCVState *env, int csr,
  * specified in section 2.5.1 of the CMO specification.
  */
 static void check_zicbo_envcfg(CPURISCVState *env, target_ulong envbits,
-                                uintptr_t ra)
+                               uintptr_t ra)
 {
 #ifndef CONFIG_USER_ONLY
-    if ((env->priv < PRV_M) && !get_field(env->menvcfg, envbits)) {
+    if ((env->priv < PRV_M) && !get_field(env->menvcfg, envbits))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, ra);
     }
 
     if (env->virt_enabled &&
         (((env->priv <= PRV_S) && !get_field(env->henvcfg, envbits)) ||
-         ((env->priv < PRV_S) && !get_field(env->senvcfg, envbits)))) {
+         ((env->priv < PRV_S) && !get_field(env->senvcfg, envbits))))
+    {
         riscv_raise_exception(env, RISCV_EXCP_VIRT_INSTRUCTION_FAULT, ra);
     }
 
-    if ((env->priv < PRV_S) && !get_field(env->senvcfg, envbits)) {
+    if ((env->priv < PRV_S) && !get_field(env->senvcfg, envbits))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, ra);
     }
 #endif
@@ -194,9 +203,12 @@ void helper_cbo_zero(CPURISCVState *env, target_ulong address)
      */
     mem = probe_write(env, address, cbozlen, mmu_idx, ra);
 
-    if (likely(mem)) {
+    if (likely(mem))
+    {
         memset(mem, 0, cbozlen);
-    } else {
+    }
+    else
+    {
         /*
          * This means that we're dealing with an I/O page. Section 4.2
          * of cmobase v1.0.1 says:
@@ -208,7 +220,8 @@ void helper_cbo_zero(CPURISCVState *env, target_ulong address)
          * Write zeros in address + cbozlen regardless of not being
          * a RAM page.
          */
-        for (int i = 0; i < cbozlen; i++) {
+        for (int i = 0; i < cbozlen; i++)
+        {
             cpu_stb_mmuidx_ra(env, address + i, 0, mmu_idx, ra);
         }
     }
@@ -249,7 +262,8 @@ static void check_zicbom_access(CPURISCVState *env,
      */
     ret = probe_access_flags(env, address, cbomlen, MMU_DATA_LOAD,
                              mmu_idx, true, &phost, ra);
-    if (ret != TLB_INVALID_MASK) {
+    if (ret != TLB_INVALID_MASK)
+    {
         /* Success: readable */
         return;
     }
@@ -290,22 +304,27 @@ target_ulong helper_sret(CPURISCVState *env)
     const target_ulong src_priv = env->priv;
     const bool src_virt = env->virt_enabled;
 
-    if (!(env->priv >= PRV_S)) {
+    if (!(env->priv >= PRV_S))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
     }
 
     target_ulong retpc = env->sepc & get_xepc_mask(env);
     if (!riscv_cpu_allow_16bit_insn(&env_archcpu(env)->cfg,
                                     env->priv_ver,
-                                    env->misa_ext) && (retpc & 0x3)) {
+                                    env->misa_ext) &&
+        (retpc & 0x3))
+    {
         riscv_raise_exception(env, RISCV_EXCP_INST_ADDR_MIS, GETPC());
     }
 
-    if (get_field(env->mstatus, MSTATUS_TSR) && !(env->priv >= PRV_M)) {
+    if (get_field(env->mstatus, MSTATUS_TSR) && !(env->priv >= PRV_M))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
     }
 
-    if (env->virt_enabled && get_field(env->hstatus, HSTATUS_VTSR)) {
+    if (env->virt_enabled && get_field(env->hstatus, HSTATUS_VTSR))
+    {
         riscv_raise_exception(env, RISCV_EXCP_VIRT_INSTRUCTION_FAULT, GETPC());
     }
 
@@ -316,26 +335,32 @@ target_ulong helper_sret(CPURISCVState *env)
     mstatus = set_field(mstatus, MSTATUS_SPIE, 1);
     mstatus = set_field(mstatus, MSTATUS_SPP, PRV_U);
 
-    if (riscv_cpu_cfg(env)->ext_ssdbltrp) {
-        if (riscv_has_ext(env, RVH)) {
+    if (riscv_cpu_cfg(env)->ext_ssdbltrp)
+    {
+        if (riscv_has_ext(env, RVH))
+        {
             target_ulong prev_vu = get_field(env->hstatus, HSTATUS_SPV) &&
                                    prev_priv == PRV_U;
             /* Returning to VU from HS, vsstatus.sdt = 0 */
-            if (!env->virt_enabled && prev_vu) {
+            if (!env->virt_enabled && prev_vu)
+            {
                 env->vsstatus = set_field(env->vsstatus, MSTATUS_SDT, 0);
             }
         }
         mstatus = set_field(mstatus, MSTATUS_SDT, 0);
     }
-    if (riscv_cpu_cfg(env)->ext_smdbltrp && env->priv >= PRV_M) {
+    if (riscv_cpu_cfg(env)->ext_smdbltrp && env->priv >= PRV_M)
+    {
         mstatus = set_field(mstatus, MSTATUS_MDT, 0);
     }
-    if (env->priv_ver >= PRIV_VERSION_1_12_0) {
+    if (env->priv_ver >= PRIV_VERSION_1_12_0)
+    {
         mstatus = set_field(mstatus, MSTATUS_MPRV, 0);
     }
     env->mstatus = mstatus;
 
-    if (riscv_has_ext(env, RVH) && !env->virt_enabled) {
+    if (riscv_has_ext(env, RVH) && !env->virt_enabled)
+    {
         /* We support Hypervisor extensions and virtulisation is disabled */
         target_ulong hstatus = env->hstatus;
 
@@ -344,7 +369,8 @@ target_ulong helper_sret(CPURISCVState *env)
 
         env->hstatus = hstatus;
 
-        if (prev_virt) {
+        if (prev_virt)
+        {
             riscv_cpu_swap_hypervisor_regs(env);
         }
     }
@@ -355,12 +381,14 @@ target_ulong helper_sret(CPURISCVState *env)
      * If forward cfi enabled for new priv, restore elp status
      * and clear spelp in mstatus
      */
-    if (cpu_get_fcfien(env)) {
+    if (cpu_get_fcfien(env))
+    {
         env->elp = get_field(env->mstatus, MSTATUS_SPELP);
     }
     env->mstatus = set_field(env->mstatus, MSTATUS_SPELP, 0);
 
-    if (riscv_cpu_cfg(env)->ext_smctr || riscv_cpu_cfg(env)->ext_ssctr) {
+    if (riscv_cpu_cfg(env)->ext_smctr || riscv_cpu_cfg(env)->ext_ssctr)
+    {
         riscv_ctr_add_entry(env, env->pc, retpc, CTRDATA_TYPE_EXCEP_INT_RET,
                             src_priv, src_virt);
     }
@@ -372,18 +400,22 @@ static void check_ret_from_m_mode(CPURISCVState *env, target_ulong retpc,
                                   target_ulong prev_priv,
                                   uintptr_t ra)
 {
-    if (!(env->priv >= PRV_M)) {
+    if (!(env->priv >= PRV_M))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, ra);
     }
 
     if (!riscv_cpu_allow_16bit_insn(&env_archcpu(env)->cfg,
                                     env->priv_ver,
-                                    env->misa_ext) && (retpc & 0x3)) {
+                                    env->misa_ext) &&
+        (retpc & 0x3))
+    {
         riscv_raise_exception(env, RISCV_EXCP_INST_ADDR_MIS, ra);
     }
 
     if (riscv_cpu_cfg(env)->pmp &&
-        !pmp_get_num_rules(env) && (prev_priv != PRV_M)) {
+        !pmp_get_num_rules(env) && (prev_priv != PRV_M))
+    {
         riscv_raise_exception(env, RISCV_EXCP_INST_ACCESS_FAULT, ra);
     }
 }
@@ -393,10 +425,12 @@ static target_ulong ssdbltrp_mxret(CPURISCVState *env, target_ulong mstatus,
 {
     /* If returning to U, VS or VU, sstatus.sdt = 0 */
     if (prev_priv == PRV_U || (prev_virt &&
-        (prev_priv == PRV_S || prev_priv == PRV_U))) {
+                               (prev_priv == PRV_S || prev_priv == PRV_U)))
+    {
         mstatus = set_field(mstatus, MSTATUS_SDT, 0);
         /* If returning to VU, vsstatus.sdt = 0 */
-        if (prev_virt && prev_priv == PRV_U) {
+        if (prev_virt && prev_priv == PRV_U)
+        {
             env->vsstatus = set_field(env->vsstatus, MSTATUS_SDT, 0);
         }
     }
@@ -421,18 +455,22 @@ target_ulong helper_mret(CPURISCVState *env)
     mstatus = set_field(mstatus, MSTATUS_MPP,
                         riscv_has_ext(env, RVU) ? PRV_U : PRV_M);
     mstatus = set_field(mstatus, MSTATUS_MPV, 0);
-    if (riscv_cpu_cfg(env)->ext_ssdbltrp) {
+    if (riscv_cpu_cfg(env)->ext_ssdbltrp)
+    {
         mstatus = ssdbltrp_mxret(env, mstatus, prev_priv, prev_virt);
     }
-    if (riscv_cpu_cfg(env)->ext_smdbltrp) {
+    if (riscv_cpu_cfg(env)->ext_smdbltrp)
+    {
         mstatus = set_field(mstatus, MSTATUS_MDT, 0);
     }
-    if ((env->priv_ver >= PRIV_VERSION_1_12_0) && (prev_priv != PRV_M)) {
+    if ((env->priv_ver >= PRIV_VERSION_1_12_0) && (prev_priv != PRV_M))
+    {
         mstatus = set_field(mstatus, MSTATUS_MPRV, 0);
     }
     env->mstatus = mstatus;
 
-    if (riscv_has_ext(env, RVH) && prev_virt) {
+    if (riscv_has_ext(env, RVH) && prev_virt)
+    {
         riscv_cpu_swap_hypervisor_regs(env);
     }
 
@@ -441,12 +479,14 @@ target_ulong helper_mret(CPURISCVState *env)
      * If forward cfi enabled for new priv, restore elp status
      * and clear mpelp in mstatus
      */
-    if (cpu_get_fcfien(env)) {
+    if (cpu_get_fcfien(env))
+    {
         env->elp = get_field(env->mstatus, MSTATUS_MPELP);
     }
     env->mstatus = set_field(env->mstatus, MSTATUS_MPELP, 0);
 
-    if (riscv_cpu_cfg(env)->ext_smctr || riscv_cpu_cfg(env)->ext_ssctr) {
+    if (riscv_cpu_cfg(env)->ext_smctr || riscv_cpu_cfg(env)->ext_ssctr)
+    {
         riscv_ctr_add_entry(env, env->pc, retpc, CTRDATA_TYPE_EXCEP_INT_RET,
                             PRV_M, false);
     }
@@ -471,20 +511,25 @@ target_ulong helper_mnret(CPURISCVState *env)
      * If MNRET changes the privilege mode to a mode
      * less privileged than M, it also sets mstatus.MPRV to 0.
      */
-    if (prev_priv < PRV_M) {
+    if (prev_priv < PRV_M)
+    {
         env->mstatus = set_field(env->mstatus, MSTATUS_MPRV, false);
     }
-    if (riscv_cpu_cfg(env)->ext_ssdbltrp) {
+    if (riscv_cpu_cfg(env)->ext_ssdbltrp)
+    {
         env->mstatus = ssdbltrp_mxret(env, env->mstatus, prev_priv, prev_virt);
     }
 
-    if (riscv_cpu_cfg(env)->ext_smdbltrp) {
-        if (prev_priv < PRV_M) {
+    if (riscv_cpu_cfg(env)->ext_smdbltrp)
+    {
+        if (prev_priv < PRV_M)
+        {
             env->mstatus = set_field(env->mstatus, MSTATUS_MDT, 0);
         }
     }
 
-    if (riscv_has_ext(env, RVH) && prev_virt) {
+    if (riscv_has_ext(env, RVH) && prev_virt)
+    {
         riscv_cpu_swap_hypervisor_regs(env);
     }
 
@@ -494,7 +539,8 @@ target_ulong helper_mnret(CPURISCVState *env)
      * If forward cfi enabled for new priv, restore elp status
      * and clear mnpelp in mnstatus
      */
-    if (cpu_get_fcfien(env)) {
+    if (cpu_get_fcfien(env))
+    {
         env->elp = get_field(env->mnstatus, MNSTATUS_MNPELP);
     }
     env->mnstatus = set_field(env->mnstatus, MNSTATUS_MNPELP, 0);
@@ -519,19 +565,20 @@ void helper_ctr_clear(CPURISCVState *env)
      * scenario the U-mode check below will handle that case.
      */
     RISCVException ret = smstateen_acc_ok(env, 0, SMSTATEEN0_CTR);
-    if (ret != RISCV_EXCP_NONE) {
+    if (ret != RISCV_EXCP_NONE)
+    {
         riscv_raise_exception(env, ret, GETPC());
     }
 
-    if (env->priv == PRV_U) {
+    if (env->priv == PRV_U)
+    {
         /*
          * One corner case is when sctrclr is executed from VU-mode and
          * mstateen.CTR = 0, in which case we are supposed to raise
          * RISCV_EXCP_ILLEGAL_INST. This case is already handled in
          * smstateen_acc_ok().
          */
-        uint32_t excep = env->virt_enabled ? RISCV_EXCP_VIRT_INSTRUCTION_FAULT :
-            RISCV_EXCP_ILLEGAL_INST;
+        uint32_t excep = env->virt_enabled ? RISCV_EXCP_VIRT_INSTRUCTION_FAULT : RISCV_EXCP_ILLEGAL_INST;
         riscv_raise_exception(env, excep, GETPC());
     }
 
@@ -546,12 +593,17 @@ void helper_wfi(CPURISCVState *env)
     bool prv_s = env->priv == PRV_S;
 
     if (((prv_s || (!rvs && prv_u)) && get_field(env->mstatus, MSTATUS_TW)) ||
-        (rvs && prv_u && !env->virt_enabled)) {
+        (rvs && prv_u && !env->virt_enabled))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
-    } else if (env->virt_enabled &&
-               (prv_u || (prv_s && get_field(env->hstatus, HSTATUS_VTW)))) {
+    }
+    else if (env->virt_enabled &&
+             (prv_u || (prv_s && get_field(env->hstatus, HSTATUS_VTW))))
+    {
         riscv_raise_exception(env, RISCV_EXCP_VIRT_INSTRUCTION_FAULT, GETPC());
-    } else {
+    }
+    else
+    {
         cs->halted = 1;
         cs->exception_index = EXCP_HLT;
         cpu_loop_exit(cs);
@@ -562,9 +614,12 @@ void helper_wrs_nto(CPURISCVState *env)
 {
     if (env->virt_enabled && (env->priv == PRV_S || env->priv == PRV_U) &&
         get_field(env->hstatus, HSTATUS_VTW) &&
-        !get_field(env->mstatus, MSTATUS_TW)) {
+        !get_field(env->mstatus, MSTATUS_TW))
+    {
         riscv_raise_exception(env, RISCV_EXCP_VIRT_INSTRUCTION_FAULT, GETPC());
-    } else if (env->priv != PRV_M && get_field(env->mstatus, MSTATUS_TW)) {
+    }
+    else if (env->priv != PRV_M && get_field(env->mstatus, MSTATUS_TW))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
     }
 }
@@ -574,12 +629,17 @@ void helper_tlb_flush(CPURISCVState *env)
     CPUState *cs = env_cpu(env);
     if (!env->virt_enabled &&
         (env->priv == PRV_U ||
-         (env->priv == PRV_S && get_field(env->mstatus, MSTATUS_TVM)))) {
+         (env->priv == PRV_S && get_field(env->mstatus, MSTATUS_TVM))))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
-    } else if (env->virt_enabled &&
-               (env->priv == PRV_U || get_field(env->hstatus, HSTATUS_VTVM))) {
+    }
+    else if (env->virt_enabled &&
+             (env->priv == PRV_U || get_field(env->hstatus, HSTATUS_VTVM)))
+    {
         riscv_raise_exception(env, RISCV_EXCP_VIRT_INSTRUCTION_FAULT, GETPC());
-    } else {
+    }
+    else
+    {
         tlb_flush(cs);
     }
 }
@@ -594,12 +654,14 @@ void helper_hyp_tlb_flush(CPURISCVState *env)
 {
     CPUState *cs = env_cpu(env);
 
-    if (env->virt_enabled) {
+    if (env->virt_enabled)
+    {
         riscv_raise_exception(env, RISCV_EXCP_VIRT_INSTRUCTION_FAULT, GETPC());
     }
 
     if (env->priv == PRV_M ||
-        (env->priv == PRV_S && !env->virt_enabled)) {
+        (env->priv == PRV_S && !env->virt_enabled))
+    {
         tlb_flush(cs);
         return;
     }
@@ -610,7 +672,8 @@ void helper_hyp_tlb_flush(CPURISCVState *env)
 void helper_hyp_gvma_tlb_flush(CPURISCVState *env)
 {
     if (env->priv == PRV_S && !env->virt_enabled &&
-        get_field(env->mstatus, MSTATUS_TVM)) {
+        get_field(env->mstatus, MSTATUS_TVM))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, GETPC());
     }
 
@@ -619,16 +682,22 @@ void helper_hyp_gvma_tlb_flush(CPURISCVState *env)
 
 static int check_access_hlsv(CPURISCVState *env, bool x, uintptr_t ra)
 {
-    if (env->priv == PRV_M) {
+    if (env->priv == PRV_M)
+    {
         /* always allowed */
-    } else if (env->virt_enabled) {
+    }
+    else if (env->virt_enabled)
+    {
         riscv_raise_exception(env, RISCV_EXCP_VIRT_INSTRUCTION_FAULT, ra);
-    } else if (env->priv == PRV_U && !get_field(env->hstatus, HSTATUS_HU)) {
+    }
+    else if (env->priv == PRV_U && !get_field(env->hstatus, HSTATUS_HU))
+    {
         riscv_raise_exception(env, RISCV_EXCP_ILLEGAL_INST, ra);
     }
 
     int mode = get_field(env->hstatus, HSTATUS_SPVP);
-    if (!x && mode == PRV_S && get_field(env->vsstatus, MSTATUS_SUM)) {
+    if (!x && mode == PRV_S && get_field(env->vsstatus, MSTATUS_SUM))
+    {
         mode = MMUIdx_S_SUM;
     }
     return mode | MMU_2STAGE_BIT;
@@ -745,7 +814,8 @@ void helper_ssamoswap_disabled(CPURISCVState *env)
      *   1. The effective priv mode is not M-mode.
      *   2. The xSSE specific to the effictive priv mode is disabled.
      */
-    if (!get_field(env->menvcfg, MENVCFG_SSE)) {
+    if (!get_field(env->menvcfg, MENVCFG_SSE))
+    {
         /*
          * Disabled M-mode SSE always trigger illegal instruction when
          * current priv mode is not M-mode.
@@ -754,18 +824,23 @@ void helper_ssamoswap_disabled(CPURISCVState *env)
         goto done;
     }
 
-    if (!riscv_has_ext(env, RVS)) {
+    if (!riscv_has_ext(env, RVS))
+    {
         /* S-mode is not implemented */
         exception = RISCV_EXCP_ILLEGAL_INST;
         goto done;
-    } else if (env->virt_enabled) {
+    }
+    else if (env->virt_enabled)
+    {
         /*
          * VU/VS-mode with disabled xSSE will trigger the virtual instruction
          * exception.
          */
         exception = RISCV_EXCP_VIRT_INSTRUCTION_FAULT;
         goto done;
-    } else {
+    }
+    else
+    {
         /*
          * U-mode with disabled S-mode SSE will trigger the illegal instruction
          * exception.
@@ -781,3 +856,189 @@ done:
 }
 
 #endif /* !CONFIG_USER_ONLY */
+
+// ---------------------------------------------------------------------
+
+#define HELPER_HEKE(name, ...)                                                    \
+    void HELPER(heke_##name)(CPURISCVState * env,                                 \
+                             target_ulong rs1, target_ulong rs2, target_ulong rd, \
+                             target_ulong r1, target_ulong r2, target_ulong rs)   \
+    {                                                                             \
+        __VA_ARGS__;                                                              \
+    }
+
+HELPER_HEKE(dma, {
+    int sel = r2 & 0x3;
+    int size;
+    switch (sel)
+    {
+    case 0:
+        size = 8;
+        break;
+    case 1:
+        size = 16;
+        break;
+    case 2:
+        size = 32;
+        break;
+    default:
+        return;
+    }
+    for (int i = 0; i < size; i++)
+    {
+        for (int j = 0; j < size; j++)
+        {
+            target_ulong src = (i * size + j) * 4;
+            target_ulong dst = (j * size + i) * 4;
+            uint32_t val = cpu_ldl_data(env, r1 + src);
+            cpu_stl_data(env, rs + dst, val);
+        }
+    }
+})
+
+HELPER_HEKE(sort, {
+    target_ulong K = rs;
+    target_ulong arr = r1;
+    if (K <= 1)
+        return;
+    for (target_ulong i = 0; i < K - 1; i++)
+    {
+        int swapped = 0;
+        for (target_ulong j = 0; j < K - i - 1; j++)
+        {
+            int32_t cur = cpu_ldl_data(env, arr + j * 4);
+            int32_t next = cpu_ldl_data(env, arr + (j + 1) * 4);
+            if (cur > next)
+            {
+                cpu_stl_data(env, arr + j * 4, next);
+                cpu_stl_data(env, arr + (j + 1) * 4, cur);
+                swapped = 1;
+            }
+        }
+        if (!swapped)
+            break;
+    }
+})
+
+HELPER_HEKE(crush, {
+    target_ulong dst = rs;
+    target_ulong src = r1;
+    target_ulong N = r2;
+    target_ulong i = 0, j = 0;
+    while (i + 1 < N)
+    {
+        uint8_t v1 = cpu_ldub_data(env, src + i);
+        uint8_t v2 = cpu_ldub_data(env, src + i + 1);
+        uint8_t packed = (v2 << 4) | (v1 & 0x0F);
+        cpu_stb_data(env, dst + j, packed);
+        i += 2;
+        j++;
+    }
+    if (i < N)
+    {
+        uint8_t v = cpu_ldub_data(env, src + i);
+        cpu_stb_data(env, dst + j, v & 0x0F);
+    }
+})
+
+HELPER_HEKE(expand, {
+    target_ulong dst = rs;
+    target_ulong src = r1;
+    target_ulong N = r2;
+    target_ulong j = 0;
+    for (target_ulong i = 0; i < N; i++)
+    {
+        uint8_t val = cpu_ldub_data(env, src + i);
+        uint8_t low = val & 0x0F;
+        uint8_t high = (val >> 4) & 0x0F;
+        cpu_stb_data(env, dst + j, low);
+        cpu_stb_data(env, dst + j + 1, high);
+        j += 2;
+    }
+})
+
+HELPER_HEKE(vdot, {
+    target_ulong v1 = r1;
+    target_ulong v2 = r2;
+    int64_t sum = 0;
+    for (int i = 0; i < 16; i++)
+    {
+        int32_t a = cpu_ldl_data(env, v1 + i * 4);
+        int32_t b = cpu_ldl_data(env, v2 + i * 4);
+        sum += (int64_t)a * (int64_t)b;
+    }
+    env->gpr[rd] = sum;
+})
+
+HELPER_HEKE(vrelu, {
+    target_ulong dst = rs;
+    target_ulong src = r1;
+    target_ulong N = r2;
+    for (target_ulong i = 0; i < N; i++)
+    {
+        int32_t val = cpu_ldl_data(env, src + i * 4);
+        if (val < 0)
+            val = 0;
+        cpu_stl_data(env, dst + i * 4, val);
+    }
+})
+
+HELPER_HEKE(vscale, {
+    target_ulong dst = rs;
+    target_ulong src = r1;
+    int32_t scale = (int32_t)r2;
+    for (int i = 0; i < 16; i++)
+    {
+        int32_t val = cpu_ldl_data(env, src + i * 4);
+        int64_t res = (int64_t)val * (int64_t)scale;
+        int32_t trc = (int32_t)res;
+        cpu_stl_data(env, dst + i * 4, trc);
+    }
+})
+
+HELPER_HEKE(vmax, {
+    target_ulong arr = r1;
+    target_ulong N = r2;
+    int32_t max = cpu_ldl_data(env, arr);
+    for (target_ulong i = 1; i < N; i++)
+    {
+        int32_t val = cpu_ldl_data(env, arr + i * 4);
+        if (val > max)
+            max = val;
+    }
+    env->gpr[rd] = (int64_t)max;
+})
+
+HELPER_HEKE(gemm, {
+    target_ulong C = rs;
+    target_ulong A = r1;
+    target_ulong B = r2;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            int64_t sum = 0;
+            for (int k = 0; k < 4; k++)
+            {
+                int32_t a = cpu_ldl_data(env, A + (i * 4 + k) * 4);
+                int32_t b = cpu_ldl_data(env, B + (k * 4 + j) * 4);
+                sum += (int64_t)a * (int64_t)b;
+            }
+            int32_t res = (int32_t)sum;
+            cpu_stl_data(env, C + (i * 4 + j) * 4, res);
+        }
+    }
+})
+
+HELPER_HEKE(vadd, {
+    target_ulong C = rs;
+    target_ulong A = r1;
+    target_ulong B = r2;
+    for (int i = 0; i < 16; i++)
+    {
+        int32_t a = cpu_ldl_data(env, A + i * 4);
+        int32_t b = cpu_ldl_data(env, B + i * 4);
+        int32_t sum = a + b;
+        cpu_stl_data(env, C + i * 4, sum);
+    }
+})

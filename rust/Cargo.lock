@@ -15,6 +15,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c84fc003e338a6f69fbd4f7fe9f92b535ff13e9af8997f3b14b6ddff8b1df46d"
 
 [[package]]
+name = "arbitrary-int"
+version = "2.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "993a810118f8f37e9c4411c86f1c4c940a09a7ab34b7bf2d88d06f50c553fab7"
+
+[[package]]
 name = "attrs"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -30,8 +36,18 @@ version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dc707ed8ebf81de5cd6c7f48f54b4c8621760926cdf35a57000747c512e67b57"
 dependencies = [
- "arbitrary-int",
- "bilge-impl",
+ "arbitrary-int 1.2.7",
+ "bilge-impl 0.2.0",
+]
+
+[[package]]
+name = "bilge"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "279c74986684d5cc7bbbd079aa448e8f852992cd385d85bb3a37e374c087b065"
+dependencies = [
+ "arbitrary-int 2.1.1",
+ "bilge-impl 0.3.0",
 ]
 
 [[package]]
@@ -42,6 +58,19 @@ checksum = "feb11e002038ad243af39c2068c8a72bcf147acf05025dcdb916fcc000adb2d8"
 dependencies = [
  "itertools",
  "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "bilge-impl"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a1176e49f42fe135cd2b56465e4f7d07038d3728f5e9f27fb2f08ed3fef75339"
+dependencies = [
+ "itertools",
+ "proc-macro-error2",
  "proc-macro2",
  "quote",
  "syn",
@@ -172,7 +201,6 @@ dependencies = [
  "migration",
  "qemu_macros",
  "qom",
- "system",
  "util",
 ]
 
@@ -187,6 +215,14 @@ dependencies = [
  "qom-sys",
  "system-sys",
  "util-sys",
+]
+
+[[package]]
+name = "i2c-gpio"
+version = "0.1.0"
+dependencies = [
+ "bilge 0.3.0",
+ "bilge-impl 0.3.0",
 ]
 
 [[package]]
@@ -251,8 +287,8 @@ checksum = "7edddbd0b52d732b21ad9a5fab5c704c14cd949e5e9a1ec5929a24fded1b904c"
 name = "pl011"
 version = "0.1.0"
 dependencies = [
- "bilge",
- "bilge-impl",
+ "bilge 0.2.0",
+ "bilge-impl 0.2.0",
  "bits",
  "bql",
  "chardev",
@@ -293,6 +329,27 @@ dependencies = [
  "proc-macro2",
  "quote",
  "version_check",
+]
+
+[[package]]
+name = "proc-macro-error-attr2"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96de42df36bb9bba5542fe9f1a054b8cc87e172759a1868aa05c1f3acc89dfc5"
+dependencies = [
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
+name = "proc-macro-error2"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "11ec05c52be0a07b08061f7dd003e7d7092e0472bc731b4af7bb1ef876109802"
+dependencies = [
+ "proc-macro-error-attr2",
+ "proc-macro2",
+ "quote",
 ]
 
 [[package]]
@@ -351,7 +408,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0dca6411025b24b60bfa7ec1fe1f8e710ac09782dca409ee8237ba74b51295fd"
 dependencies = [
  "serde_core",
- "serde_derive",
 ]
 
 [[package]]
@@ -390,6 +446,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
+name = "spi"
+version = "0.1.0"
+
+[[package]]
 name = "syn"
 version = "2.0.104"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -407,6 +467,7 @@ dependencies = [
  "bql",
  "common",
  "glib-sys",
+ "hwcore",
  "migration",
  "qom",
  "system-sys",

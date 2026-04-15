@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "hw/char/pl011",
+    "hw/char/pl011", "hw/i2c-gpio", "hw/spi",
     "hw/timer/hpet",
     "tests",
 ]

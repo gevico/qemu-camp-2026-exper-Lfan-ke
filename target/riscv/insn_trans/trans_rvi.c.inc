@@ -1223,3 +1223,29 @@ static bool trans_csrrci(DisasContext *ctx, arg_csrrci * a)
                              ctx->zero, ctx->zero, mask, ctx->zero);
     }
 }
+
+/* -------------------------------------------------------------------- */
+
+#define TRANS_HEKE(name)                                                 \
+    static bool trans_##name(DisasContext *ctx, arg_##name *a)           \
+    {                                                                    \
+        gen_helper_##name(tcg_env,                                       \
+                          tcg_constant_tl(a->rs1),                       \
+                          tcg_constant_tl(a->rs2),                       \
+                          tcg_constant_tl(a->rd),                        \
+                          cpu_gpr[a->rs1],                               \
+                          cpu_gpr[a->rs2],                               \
+                          cpu_gpr[a->rd]);                               \
+        return true;                                                     \
+    }
+
+TRANS_HEKE(heke_dma)
+TRANS_HEKE(heke_sort)
+TRANS_HEKE(heke_crush)
+TRANS_HEKE(heke_expand)
+TRANS_HEKE(heke_vdot)
+TRANS_HEKE(heke_vrelu)
+TRANS_HEKE(heke_vscale)
+TRANS_HEKE(heke_vmax)
+TRANS_HEKE(heke_gemm)
+TRANS_HEKE(heke_vadd)
