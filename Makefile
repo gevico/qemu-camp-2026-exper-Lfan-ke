@@ -306,7 +306,7 @@ hk-gp:
 	@-${MAKE} -f Makefile.camp test-gpgpu
 
 hk-bd:
-	@-${MAKE} -C build check-gevico-qtest
+	@-${MAKE} -f Makefile.camp test-soc
 
 hk-is:
 	@-${MAKE} -C build check-gevico-tcg
